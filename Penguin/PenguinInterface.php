@@ -10,6 +10,10 @@ interface PenguinInterface {
 	public function decodeExtensionPacket($strRawPacket);
 	public function decodeVerticalData($strVerticalData);
 	
+	public function joinRoom($intRoom, $intX = 0, $intY = 0);
+	
+	public function sendXt();
+	
 }
 
 ?>
