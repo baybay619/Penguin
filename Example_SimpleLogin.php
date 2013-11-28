@@ -8,7 +8,7 @@ spl_autoload_register(function($strClass){
 
 $objClient = new Penguin();
 
-$objClient->login('Arthy0', 'I\'m fuckin\' gay');
+$objClient->login('Username', 'Password');
 
 $objClient->joinServer('Blizzard');
 
