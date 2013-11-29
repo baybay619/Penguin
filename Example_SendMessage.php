@@ -25,25 +25,11 @@ if($mixStatus !== true){
 
 echo 'Successfully joined room!', chr(10);
 
+$arrMessages = array('Hello world', 'Party at my igloo', 'I like your hair', 'Welcome', 'Cool');
+
 while(true){
-	$strData = $objPenguin->recv();
-	if($strData != null){
-		if(substr_count($strData, chr(0)) > 1){
-			$arrData = explode(chr(0), $strData);
-			array_pop($arrData);
-			
-			foreach($arrData as $strPacket){
-				if($strPacket != ''){
-					echo $strPacket, chr(10);
-				}
-			}
-		} else {
-			$arrData = explode(chr(0), $strData);
-			list($strPacket) = $arrData;
-			
-			echo $strPacket, chr(10);
-		}
-	}
+	$objPenguin->sendMessage($arrMessages[array_rand($arrMessages)]);
+	sleep(mt_rand(2, 3));
 }
 
 ?>

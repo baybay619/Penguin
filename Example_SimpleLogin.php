@@ -8,7 +8,11 @@ spl_autoload_register(function($strClass){
 
 $objClient = new Penguin();
 
-$objClient->login('Username', 'Password');
+$mixStatus = $objClient->login('Username', 'Password');
+if($mixStatus !== true){
+	list($intError, $strError) = $mixStatus;
+	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();
+}
 
 $objClient->joinServer('Blizzard');
 

@@ -5,6 +5,7 @@ use Petrel;
 
 class Penguin extends Petrel\ClientBase implements PenguinInterface {
 	
+	public $arrErrors;
 	public $arrRooms;
 	public $arrServers;
 	
@@ -20,7 +21,10 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 	
 	private $strRawPlayer;
 	
+	use Interactions;
+	
 	public function __construct(){
+		$this->arrErrors = parse_ini_file('INI/Errors.ini', true);
 		$this->arrRooms = parse_ini_file('INI/Rooms.ini', true);
 		$this->arrServers = parse_ini_file('INI/Servers.ini', true);
 	}
@@ -33,41 +37,6 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		echo $strPacket, chr(10);
 		
 		$this->send($strPacket);
-	}
-	
-	public function joinRoom($intRoom, $intX = 0, $intY = 0){
-		$this->sendXt('s', 'j#jr', -1, $intRoom, $intX, $intY);
-		
-		$strData = $this->recv();
-		$arrData = explode(chr(0), $strData);
-		array_pop($arrData);
-		
-		foreach($arrData as $strData){
-			$arrPacket = $this->decodeExtensionPacket($strData);
-			if($arrPacket[1] == 'jr'){
-				$this->intExternalRoom = $intRoom;
-				$this->intInternalRoom = $this->arrRooms[$intRoom]['Internal'];
-				return true;
-			}
-		}
-		
-		while($arrPacket[1] != 'jr'){
-			$strData = $this->recv();
-			if($strData != null){
-				$arrData = explode(chr(0), $strData);
-				array_pop($arrData);
-				
-				foreach($arrData as $strPacket){
-					if($strPacket != ''){
-						$arrPacket = $this->decodeExtensionPacket($strPacket);
-
-						if($arrPacket[1] == 'ap'){
-							break 2;
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	private function encryptPassword($strPassword){
@@ -89,7 +58,7 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		if($intRandom == 0) return '204.75.167.218';
 		if($intRandom == 1) return '204.75.167.219';
 		if($intRandom == 2) return '204.75.167.176';
-        if($intRandom == 3) return '204.75.167.177';
+		if($intRandom == 3) return '204.75.167.177';
 	}
 	
 	private function generateLoginPort(){
@@ -156,7 +125,11 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 	private function handleLogin($strResult){
 		$arrPacket = $this->decodeExtensionPacket($strResult);
 
-		if($arrPacket[1] == 'e') return $arrPacket[3];
+		if($arrPacket[1] == 'e'){
+			$intError = $arrPacket[3];
+			$strError = $this->arrErrors[$intError]['Description'];
+			return array($intError, $strError);
+		}
 		
 		$strVertical = $arrPacket[3];
 		$arrVertical = $this->decodeVerticalData($strVertical);
