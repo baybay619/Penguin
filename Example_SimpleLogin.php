@@ -8,7 +8,7 @@ spl_autoload_register(function($strClass){
 
 $objClient = new Penguin();
 
-$mixStatus = $objClient->login('Username', 'Password');
+$mixStatus = $objClient->login('Tails25', 'tails25');
 if($mixStatus !== true){
 	list($intError, $strError) = $mixStatus;
 	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();

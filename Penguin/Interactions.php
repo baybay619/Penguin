@@ -4,6 +4,16 @@ namespace Penguin;
 
 trait Interactions {
 	
+	public function getPlayer($intPlayer){
+		$arrData = array('s', 'u#gp', $this->intInternalRoom, $intPlayer);
+		
+		$arrData = $this->sendXtAndWait($arrData, 'gp');
+		
+		$arrPlayer = $this->decodeVerticalData($arrData[3]);
+		
+		return $arrPlayer;
+	}
+	
 	public function joinRoom($intRoom, $intX = 0, $intY = 0){
 		$this->sendXt('s', 'j#jr', -1, $intRoom, $intX, $intY);
 		

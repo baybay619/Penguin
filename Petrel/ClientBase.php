@@ -8,6 +8,7 @@ abstract class ClientBase {
 	
 	public function connect($strAddress, $intPort){
 		$this->resSocket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		
 		socket_connect($this->resSocket, $strAddress, $intPort);
 	}
 	
@@ -16,7 +17,7 @@ abstract class ClientBase {
 	}
 	
 	public function recv(){
-		$intReceived = socket_recv($this->resSocket, $strData, 3072, 0);
+		$intReceived = socket_recv($this->resSocket, $strData, 5120, 0);
 		
 		return $strData;
 	}

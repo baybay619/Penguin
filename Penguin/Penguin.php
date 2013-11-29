@@ -34,10 +34,61 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		$strPacket = '%xt%';
 		
 		$strPacket .= implode('%', $arrData) . '%';
-		echo $strPacket, chr(10);
 		
 		$this->send($strPacket);
 	}
+	 
+	// Because blocking breaks things ?
+	public function sendXtAndWait($arrData, $strHandler){
+		$strPacket = '%xt%';
+		
+		$strPacket .= implode('%', $arrData) . '%';
+		
+		$this->send($strPacket);
+		
+		// And now we wait..
+		
+		$strData = $this->recv();
+		$arrData = explode(chr(0), $strData);
+		array_pop($arrData);
+		
+		foreach($arrData as $strPacket){
+			$arrPacket = $this->decodeExtensionPacket($strPacket);
+			
+			if($arrPacket[1] == $strHandler){
+				return $arrPacket;
+			} elseif($arrPacket[1] == 'e'){
+				$intError = $arrPacket[3];
+				$strError = $this->arrErrors[$intError]['Description'];
+				
+				return array($intError, $strError);
+			}
+		}
+		
+		while($arrPacket[1] != $strHandler){
+			$strData = $this->recv();
+			if($strData != null){
+				$arrData = explode(chr(0), $strData);
+				array_pop($arrData);
+				
+				foreach($arrData as $strPacket){
+					if($strPacket != ''){
+						$arrPacket = $this->decodeExtensionPacket($strPacket);
+						
+						if($arrPacket[1] == $strHandler){
+							return $arrPacket;
+						} elseif($arrPacket[1] == 'e'){
+							$intError = $arrPacket[3];
+							$strError = $this->arrErrors[$intError]['Description'];
+							
+							return array($intError, $strError);
+						}
+					}
+				}
+			}
+		}
+	} // End sendXtAndWait
+		
 	
 	private function encryptPassword($strPassword){
 		$strMd5Hash = md5($strPassword);
@@ -77,6 +128,7 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 	
 	public function decodeVerticalData($strVerticalData){
 		$arrVertical = explode('|', $strVerticalData);
+		array_pop($arrVertical); // Hopefully this doesn't break anything 
 		
 		return $arrVertical;
 	}

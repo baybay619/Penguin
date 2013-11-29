@@ -15,6 +15,7 @@ interface PenguinInterface {
 	public function sendPosition($intX, $intY);
 	
 	public function sendXt();
+	public function sendXtAndWait($arrData, $strHandler);
 	
 }
 
