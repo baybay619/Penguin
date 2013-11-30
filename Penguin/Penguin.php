@@ -190,7 +190,6 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		$this->send('%xt%s%g#gi%-1%');
 		
 		$arrPacket = $this->waitForHandler('lp');
-		print_r($arrPacket);
 	}
 	
 	private function handleLogin($strResult){
