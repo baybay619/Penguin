@@ -37,7 +37,7 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		
 		$this->send($strPacket);
 	}
-	 
+	
 	// Because blocking breaks things ?
 	public function sendXtAndWait($arrData, $strHandler){
 		$strPacket = '%xt%';
@@ -87,8 +87,26 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 				}
 			}
 		}
-	} // End sendXtAndWait
-		
+	} // End sendXtAndWait		
+	
+	public function waitForHandler($strHandler){
+		do {
+			$strData = $this->recv();
+			
+			if($strData != null){
+				$arrData = explode(chr(0), $strData);
+				array_pop($arrData);
+				
+				foreach($arrData as $strData){
+					$arrPacket = $this->decodeExtensionPacket($strData);
+					
+					if($arrPacket[1] == $strHandler){
+						return $arrPacket;
+					}
+				}
+			}
+		} while($arrPacket[1] != $strHandler);
+	}
 	
 	private function encryptPassword($strPassword){
 		$strMd5Hash = md5($strPassword);
@@ -171,7 +189,8 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		
 		$this->send('%xt%s%g#gi%-1%');
 		
-		$this->recv();
+		$arrPacket = $this->waitForHandler('lp');
+		print_r($arrPacket);
 	}
 	
 	private function handleLogin($strResult){

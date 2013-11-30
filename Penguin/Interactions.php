@@ -4,6 +4,10 @@ namespace Penguin;
 
 trait Interactions {
 	
+	public function addItem($intItem){
+		$this->sendXt('s', 'i#ai', $this->intInternalRoom, $intItem);
+	}
+	
 	public function getPlayer($intPlayer){
 		$arrData = array('s', 'u#gp', $this->intInternalRoom, $intPlayer);
 		

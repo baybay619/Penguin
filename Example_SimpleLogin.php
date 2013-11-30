@@ -16,7 +16,12 @@ if($mixStatus !== true){
 
 $objClient->joinServer('Blizzard');
 
-$strResult = $objClient->recv();
-echo $strResult, chr(10);
+while(true){
+	$strResult = $objClient->recv();
+	if($strResult !== null){
+		echo $strResult, chr(10);
+		return true;
+	}
+}
 
 ?>
