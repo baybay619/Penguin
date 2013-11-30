@@ -7,7 +7,7 @@ spl_autoload_register(function($strClass){
 });
 
 $objPenguin = new Penguin();
-$mixStatus = $objPenguin->login('Arthy0', 'I\'m fuckin\' gay');
+$mixStatus = $objPenguin->login('Username', 'Password');
 
 if($mixStatus !== true){
 	list($intError, $strError) = $mixStatus;
