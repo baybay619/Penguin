@@ -25,7 +25,7 @@ if($mixStatus !== true){
 
 echo 'Successfully joined room!', chr(10);
 
-$arrData = $objPenguin->getPlayer(1); // Change 81 to any player id you want
+$arrData = $objPenguin->getPlayer(81); // Change 81 to any player id you want
 
 list($intPlayer, $strUsername) = $arrData;
 
