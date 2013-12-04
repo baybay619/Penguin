@@ -123,16 +123,24 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 	}
 	
 	private function generateLoginAddress(){
-		$intRandom = mt_rand(0, 3);
-		if($intRandom == 0) return '204.75.167.218';
-		if($intRandom == 1) return '204.75.167.219';
-		if($intRandom == 2) return '204.75.167.176';
-		if($intRandom == 3) return '204.75.167.177';
-	}
-	
-	private function generateLoginPort(){
+		$arrAddresses = array(
+			'204.75.167.218',
+			'204.75.167.219',
+			'204.75.167.176',
+			'204.75.167.177'
+		);
+		
+		$intRandom = array_rand($arrAddresses);
+		$strAddress = $arrAddresses[$intRandom];
+		
 		$intASCII = ord($this->strUsername);
-		return $intASCII ? 6112 : 3724;
+		$intPort = $intASCII ? 6112 : 3724;
+		
+		if($strAddress == '204.75.167.176' && $intPort == 3724){
+			return $this->generateLoginAddress();
+		} else {
+			return array($strAddress, $intPort);
+		}
 	}
 	
 	public function decodeExtensionPacket($strRawPacket){
@@ -155,8 +163,8 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		$this->strUsername = $strUsername;
 		$this->strPassword = $strPassword;
 		
-		$strAddress = $this->generateLoginAddress();
-		$intPort = $this->generateLoginPort();
+		$arrServer = $this->generateLoginAddress();
+		list($strAddress, $intPort) = $arrServer;
 		
 		$strData = $this->sendHandshake($strAddress, $intPort);
 		
@@ -167,11 +175,11 @@ class Penguin extends Petrel\ClientBase implements PenguinInterface {
 		
 		$strResult = $this->recv();
 		
-		$blnResult = $this->handleLogin($strResult);
+		$mixResult = $this->handleLogin($strResult);
 		
 		$this->disconnect();
 		
-		return $blnResult;
+		return $mixResult;
 	}
 	
 	public function joinServer($strName){

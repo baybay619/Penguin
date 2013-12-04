@@ -14,7 +14,8 @@ if($mixStatus !== true){
 	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();
 }
 
-$objClient->joinServer('Blizzard');
+$objClient->joinServer('Cozy');
+$objClient->joinRoom(100);
 
 while(true){
 	$strResult = $objClient->recv();
