@@ -7,7 +7,7 @@ spl_autoload_register(function($strClass){
 });
 
 $objPenguin = new Penguin();
-$objClient->addListener('jr', function($arrPacket){
+$objPenguin->addListener('jr', function($arrPacket){
 	$intRoom = $arrPacket[3];
 	echo 'Joined room! ', $intRoom, chr(10);
 });
