@@ -9,11 +9,13 @@ abstract class ClientBase {
 	public function connect($strAddress, $intPort){
 		$this->resSocket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		
-		socket_connect($this->resSocket, $strAddress, $intPort);
+		$blnSuccess = socket_connect($this->resSocket, $strAddress, $intPort);
+		
+		return $blnSuccess;
 	}
 	
 	public function disconnect(){
-		socket_close($this->resSocket);
+		socket_shutdown($this->resSocket);
 	}
 	
 	public function recv(){
