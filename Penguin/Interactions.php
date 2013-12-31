@@ -19,6 +19,10 @@ trait Interactions {
 	}
 	
 	public function joinRoom($intRoom, $intX = 0, $intY = 0){
+		$intInternal = function($intRoom){
+			return array_key_exists($intRoom, $this->arrRooms) ? $this->arrRooms[$intRoom]['Internal'] : -1;
+		};
+		
 		$this->sendXt('s', 'j#jr', -1, $intRoom, $intX, $intY);
 		
 		$strData = $this->recv();
@@ -28,9 +32,13 @@ trait Interactions {
 		foreach($arrData as $strData){
 			$arrPacket = $this->decodeExtensionPacket($strData);
 			
+			if(!isset($arrPacket[1])){
+				continue;
+			}
+			
 			if($arrPacket[1] == 'jr'){
 				$this->intExternalRoom = $intRoom;
-				$this->intInternalRoom = $this->arrRooms[$intRoom]['Internal'];
+				$this->intInternalRoom = $intInternal($intRoom);
 				
 				return true;
 			} elseif($arrPacket[1] == 'e'){
@@ -42,12 +50,14 @@ trait Interactions {
 					return array($intError, $strError);
 				} else {
 					$this->intExternalRoom = $intRoom;
-					$this->intInternalRoom = $this->arrRooms[$intRoom]['Internal'];
+					$this->intInternalRoom = $intInternal($intRoom);
 					
 					return true;
 				}
 			}
 		}
+		
+		$arrPacket = array(null, null);
 		
 		while($arrPacket[1] != 'jr'){
 			$strData = $this->recv();
@@ -61,7 +71,7 @@ trait Interactions {
 
 						if($arrPacket[1] == 'ap'){
 							$this->intExternalRoom = $intRoom;
-							$this->intInternalRoom = $this->arrRooms[$intRoom]['Internal'];
+							$this->intInternalRoom = $intInternal($intRoom);
 								
 							return true;
 						} elseif($arrPacket[1] == 'e'){
@@ -73,7 +83,7 @@ trait Interactions {
 								return array($intError, $strError);
 							} else {
 								$this->intExternalRoom = $intRoom;
-								$this->intInternalRoom = $this->arrRooms[$intRoom]['Internal'];
+								$this->intInternalRoom = $intInternal($intRoom);
 								
 								return true;
 							}

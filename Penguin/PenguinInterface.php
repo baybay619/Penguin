@@ -7,6 +7,9 @@ interface PenguinInterface {
 	public function login($strUsername, $strPassword);
 	public function joinServer($strName);
 	
+	public function addListener($strHandler, Callable $mixCallback);
+	public function removeListener($strHandler);
+	
 	public function decodeExtensionPacket($strRawPacket);
 	public function decodeVerticalData($strVerticalData);
 	
