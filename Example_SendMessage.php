@@ -7,23 +7,19 @@ spl_autoload_register(function($strClass){
 });
 
 $objPenguin = new Penguin();
-$mixStatus = $objPenguin->login('Username', 'Password');
+$objClient->addListener('jr', function($arrPacket){
+	$intRoom = $arrPacket[3];
+	echo 'Joined room! ', $intRoom, chr(10);
+});
 
-if($mixStatus !== true){
-	list($intError, $strError) = $mixStatus;
-	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();
+try {
+	$objPenguin->login('Username', 'Password');
+	$objPenguin->joinServer('Abominable');
+} catch(Exceptions\ConnectionException $objException){
+	die();
 }
 
-$objPenguin->joinServer('Abominable');
-
-$mixStatus = $objPenguin->joinRoom(100);
-
-if($mixStatus !== true){
-	list($intError, $strError) = $mixStatus;
-	echo 'Unable to join room (', $intError, ' - ', $strError, ')', chr(10);
-}
-
-echo 'Successfully joined room!', chr(10);
+$objPenguin->joinRoom(100);
 
 $arrMessages = array('Hello world', 'Party at my igloo', 'I like your hair', 'Welcome', 'Cool');
 

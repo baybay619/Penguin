@@ -7,14 +7,17 @@ spl_autoload_register(function($strClass){
 });
 
 $objPenguin = new Penguin();
-$mixStatus = $objPenguin->login('Username', 'Password');
+$objClient->addListener('jr', function($arrPacket){
+	$intRoom = $arrPacket[3];
+	echo 'Joined room! ', $intRoom, chr(10);
+});
 
-if($mixStatus !== true){
-	list($intError, $strError) = $mixStatus;
-	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();
+try {
+	$objPenguin->login('Username', 'Password');
+	$objPenguin->joinServer('Cozy');
+} catch(Exceptions\ConnectionException $objException){
+	die();
 }
-
-$objPenguin->joinServer('Cozy');
 
 $mixStatus = $objPenguin->joinRoom(100);
 
@@ -23,28 +26,12 @@ if($mixStatus !== true){
 	echo 'Unable to join room (', $intError, ' - ', $strError, ')', chr(10);
 }
 
-echo 'Successfully joined room!', chr(10);
-
 while(true){
 	$strData = $objPenguin->recv();
-	if($strData != null){
-		if(substr_count($strData, chr(0)) > 1){
-			$arrData = explode(chr(0), $strData);
-			array_pop($arrData);
-			
-			foreach($arrData as $strPacket){
-				if($strPacket != ''){
-					echo $strPacket, chr(10);
-				}
-			}
-		} else {
-			$arrData = explode(chr(0), $strData);
-			list($strPacket) = $arrData;
-			
-			echo $strPacket, chr(10);
-		}
-	}
+	echo $strData, chr(10);
+	
 	$objPenguin->sendPosition(mt_rand(100, 300), mt_rand(100, 300));
+	usleep(1000);
 }
 
 ?>

@@ -1,28 +1,30 @@
 <?php
 
 namespace Penguin;
+use Penguin\Exceptions;
 
 spl_autoload_register(function($strClass){
 	include str_replace('\\', '/', $strClass) . '.php';
 });
 
 $objClient = new Penguin();
+$objClient->addListener('jr', function($arrPacket){
+	$intRoom = $arrPacket[3];
+	echo 'Joined room! ', $intRoom, chr(10);
+});
 
-$mixStatus = $objClient->login('Username', 'Password');
-if($mixStatus !== true){
-	list($intError, $strError) = $mixStatus;
-	echo 'Unable to login (', $intError, ' - ', $strError, ')', chr(10), die();
+try {
+	$objClient->login('Username', 'Password');
+	$objClient->joinServer('Cozy');
+} catch(Exceptions\ConnectionException $objException){
+	die();
 }
 
-$objClient->joinServer('Cozy');
 $objClient->joinRoom(100);
 
 while(true){
 	$strResult = $objClient->recv();
-	if($strResult !== null){
-		echo $strResult, chr(10);
-		return true;
-	}
+	echo $strResult, chr(10);
 }
 
 ?>
