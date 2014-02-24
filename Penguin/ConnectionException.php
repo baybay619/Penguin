@@ -1,8 +1,6 @@
 <?php
 
-namespace Penguin\Exceptions;
-
-class ConnectionException extends \Exception {
+class ConnectionException extends Exception {
 	
 	public function __construct($strError, $intError, $mixOther = null){
 		$this->strError = $strError;

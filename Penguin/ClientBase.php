@@ -1,7 +1,5 @@
 <?php
 
-namespace Petrel;
-
 abstract class ClientBase {
 	
 	public $resSocket;
