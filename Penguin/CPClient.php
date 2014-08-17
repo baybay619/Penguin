@@ -143,33 +143,13 @@ class CPClient extends ClientBase implements CPClientInterface {
 		$strPacket .= implode('%', $arrData) . '%';
 		
 		$this->send($strPacket);
-	}	
-	
-	private function generateLoginAddress(){
-		$arrAddresses = array(
-			'204.75.167.218',
-			'204.75.167.219',
-			'204.75.167.176',
-			'204.75.167.177'
-		);
-		
-		$intRandom = array_rand($arrAddresses);
-		$strAddress = $arrAddresses[$intRandom];
-		
-		$intASCII = ord($this->strUsername);
-		$intPort = $intASCII ? 6112 : 3724;
-		
-		return array($strAddress, $intPort);
 	}
 	
 	public function login($strUsername, $strPassword){
 		$this->strUsername = $strUsername;
 		$this->strPassword = $strPassword;
 		
-		$arrServer = $this->generateLoginAddress();
-		list($strAddress, $intPort) = $arrServer;
-		
-		$strData = $this->sendHandshake('204.75.167.177', 3724);
+		$strData = $this->sendHandshake('204.75.167.165', 3724);
 		
 		$objXml = simplexml_load_string($strData);
 		$strKey = Crypto::generateKey($strPassword, $objXml->body->k);
