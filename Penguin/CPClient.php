@@ -31,7 +31,7 @@ class CPClient extends ClientBase implements CPClientInterface {
 		$this->arrServers = parse_ini_file('INI/Servers.ini', true);
 		
 		$this->addListener('e', function($arrPacket){
-			$intError = $arrPacket[2];
+			$intError = $arrPacket[3];
 			
 			echo 'Received error: ', $intError, '!', chr(10);
 		});
@@ -83,7 +83,7 @@ class CPClient extends ClientBase implements CPClientInterface {
 	}
 	
 	public function addListener($strHandler, Callable $mixCallback){
-		$this->arrListeners[$strHandler] = $mixCallback;
+		$this->arrListeners[$strHandler][] = $mixCallback;
 	}
 	
 	public function removeListener($strHandler){
@@ -91,24 +91,30 @@ class CPClient extends ClientBase implements CPClientInterface {
 	}
 	
 	public function recv(){
-		$arrSockets = array($this->resSocket);
-		$intChanged = socket_select($arrSockets, $arrWrite, $arrExcept, 30);
-		if($intChanged == 0){
-			echo 'Haven\'t received any data within the past 30 seconds', chr(10);
-			$strData = $this->recv();
-			return $strData;
-		}
+		if(!$this->usingProxy) { // If we're not using a proxy, we're going to use the ordinary socket_ functions
+			$arrSockets = array($this->resSocket);
+			
+			$intChanged = socket_select($arrSockets, $arrWrite, $arrExcept, 30);
+			if($intChanged == 0){
+				echo 'Haven\'t received any data within the past 30 seconds', chr(10);
+				$strData = $this->recv();
+				
+				return $strData;
+			}
+			
+			$mixReceived = @socket_recv($this->resSocket, $strData, 8192, 0);
 		
-		$mixReceived = @socket_recv($this->resSocket, $strData, 8192, 0);
-		
-		if($mixReceived === 0){
-			socket_shutdown($this->resSocket);
-			echo 'Disconnected.', chr(10), die();
-		}
-		
-		while(strpos($strData, chr(0)) === false){
-			@socket_recv($this->resSocket, $strMissing, 8192, 0);
-			$strData .= $strMissing;
+			if($mixReceived === 0){
+				socket_shutdown($this->resSocket);
+				echo 'Disconnected.', chr(10), die();
+			}
+			
+			while(strpos($strData, chr(0)) === false){
+				@socket_recv($this->resSocket, $strMissing, 8192, 0);
+				$strData .= $strMissing;
+			}
+		} else { // Otherwise we're going to use the file handler functions built-in to PHP
+			$strData = $this->proxyObject->ph_read();
 		}
 		
 		if(XTParser::IsValid($strData) && !empty($this->arrListeners)){
@@ -123,11 +129,12 @@ class CPClient extends ClientBase implements CPClientInterface {
 						$strHandler = $arrPacket[1];
 						
 						if(array_key_exists($strHandler, $this->arrListeners)){
-							$mixCallable = $this->arrListeners[$strHandler];
-							
-							call_user_func($mixCallable, $arrPacket);
+							foreach($this->arrListeners[$strHandler] as $mixCallable) {
+								call_user_func($mixCallable, $arrPacket);
+							}
 						}
 					}
+					
 					$strData = $strPacket;
 				}
 			}
@@ -143,7 +150,7 @@ class CPClient extends ClientBase implements CPClientInterface {
 		$strPacket .= implode('%', $arrData) . '%';
 		
 		$this->send($strPacket);
-	}
+	}	
 	
 	public function login($strUsername, $strPassword){
 		$this->strUsername = $strUsername;
@@ -178,15 +185,18 @@ class CPClient extends ClientBase implements CPClientInterface {
 		$this->send('%xt%s%j#js%-1%' . $this->intPlayerId . '%' . $this->strLoginKey . '%en%');
 		$this->send('%xt%s%g#gi%-1%');
 		
-		socket_set_nonblock($this->resSocket);
+		if(!$this->usingProxy) {
+			socket_set_nonblock($this->resSocket);
+		}
 	}
 	
 	private function handleLogin($strResult){
 		$arrPacket = XTParser::ParseRaw($strResult);
 
-		if($arrPacket[1] == 'e'){
+		if($arrPacket[1] == 'e'){			
 			$intError = $arrPacket[3];
 			$strError = $this->arrErrors[$intError]['Description'];
+			
 			throw new ConnectionException($strError, $intError);
 		}
 		
